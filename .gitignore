@@ -75,6 +75,7 @@ fabric.properties
 
 # build class
 **/target/classes/**
+**/target/test-classes/**
 
 # properties
 twitter.properties
