@@ -1,4 +1,4 @@
-package com.yunhongmin.kafka.Validators;
+package com.yunhongmin.kafka.validators;
 
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigException;

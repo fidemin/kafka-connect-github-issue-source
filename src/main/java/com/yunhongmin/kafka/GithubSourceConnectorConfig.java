@@ -1,7 +1,7 @@
 package com.yunhongmin.kafka;
 
-import com.yunhongmin.kafka.Validators.BatchSizeValidator;
-import com.yunhongmin.kafka.Validators.TimestampValidator;
+import com.yunhongmin.kafka.validators.BatchSizeValidator;
+import com.yunhongmin.kafka.validators.TimestampValidator;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Type;
