@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
-public class ConnectorConfig extends AbstractConfig {
+public class GithubSourceConnectorConfig extends AbstractConfig {
     public static final String TOPIC_CONFIG = "topic";
     private static final String TOPIC_DOC = "Topic to write to";
 
@@ -36,19 +36,19 @@ public class ConnectorConfig extends AbstractConfig {
     private static final String AUTH_PASSWORD_DOC = "Optional Password to authenticate calls";
 
 
-    public ConnectorConfig(ConfigDef definition, Map<String, String> originals) {
+    public GithubSourceConnectorConfig(ConfigDef definition, Map<String, String> originals) {
         super(definition, originals);
     }
 
-    public ConnectorConfig(Map<String, String> originals) {
-        this(getConfDef(), originals);
+    public GithubSourceConnectorConfig(Map<String, String> originals) {
+        this(confDef(), originals);
     }
 
     /**
      * getConfig is used only to make constructor with this works.
      *     why: this(...) should be first statement
      */
-    public static ConfigDef getConfDef() {
+    public static ConfigDef confDef() {
         return new ConfigDef()
                 .define(TOPIC_CONFIG, Type.STRING, Importance.HIGH, TOPIC_DOC)
                 .define(OWNER_CONFIG, Type.STRING, Importance.HIGH, OWNER_DOC)
