@@ -1,5 +1,7 @@
 package com.yunhongmin.kafka;
 
+import com.yunhongmin.kafka.Validators.BatchSizeValidator;
+import com.yunhongmin.kafka.Validators.TimestampValidator;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Type;
@@ -51,9 +53,10 @@ public class ConnectorConfig extends AbstractConfig {
                 .define(TOPIC_CONFIG, Type.STRING, Importance.HIGH, TOPIC_DOC)
                 .define(OWNER_CONFIG, Type.STRING, Importance.HIGH, OWNER_DOC)
                 .define(REPO_CONFIG, Type.STRING, Importance.HIGH, REPO_DOC)
-                .define(BATCH_SIZE_CONFIG, Type.INT, 100, Importance.LOW, BATCH_SIZE_DOC)
+                .define(BATCH_SIZE_CONFIG, Type.INT, 100,
+                        new BatchSizeValidator(), Importance.LOW, BATCH_SIZE_DOC)
                 .define(SINCE_CONFIG, Type.STRING, ZonedDateTime.now().minusYears(1).toInstant().toString(),
-                        Importance.LOW, SINCE_DOC)
+                        new TimestampValidator(), Importance.LOW, SINCE_DOC)
                 .define(AUTH_USERNAME_CONFIG, Type.STRING, "", Importance.HIGH, AUTH_USERNAME_DOC)
                 .define(AUTH_PASSWORD_CONFIG, Type.PASSWORD, "", Importance.HIGH, AUTH_PASSWORD_DOC);
     }
