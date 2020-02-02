@@ -91,6 +91,7 @@ public class GithubAPIHTTPClient {
     protected void sleepIfNeeds() throws InterruptedException {
         if (xRateRemaining > 0 && xRateRemaining <= 10) {
             logger.info(String.format("We are approaching the limit. only %s left", xRateRemaining));
+            // Split total sleep time evenly by xRateRemaining until reaching xRateReset time.
             long sleepTime = (long) Math.ceil(
                     (double) ((xRateReset - Instant.now().getEpochSecond()) / xRateRemaining)
             );
