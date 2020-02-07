@@ -23,8 +23,7 @@ public class GithubSourceConnector extends SourceConnector {
 
     @Override
     public Class<? extends Task> taskClass() {
-        // TODO: need to add task class after creating the class
-        return null;
+        return GithubSourceTask.class;
     }
 
     @Override

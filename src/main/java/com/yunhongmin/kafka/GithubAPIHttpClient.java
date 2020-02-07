@@ -18,8 +18,8 @@ import java.time.ZoneOffset;
 /**
  * used to send and get result from Github issue HTTP GET API
  */
-public class GithubAPIHTTPClient {
-    private static final Logger logger = LoggerFactory.getLogger(GithubAPIHTTPClient.class);
+public class GithubAPIHttpClient {
+    private static final Logger logger = LoggerFactory.getLogger(GithubAPIHttpClient.class);
 
     private Integer xRateLimit = 9999;
     private Integer xRateRemaining = 9999;
@@ -27,9 +27,11 @@ public class GithubAPIHTTPClient {
 
     GithubSourceConnectorConfig config;
 
-    protected JSONArray getIssues(Integer page) throws InterruptedException {
+    public GithubAPIHttpClient(GithubSourceConnectorConfig config) {this.config = config;}
+
+    protected JSONArray getIssues(Integer page, Instant since) throws InterruptedException {
         try {
-            HttpResponse<JsonNode> jsonResponse = sendIssuesAPI(page);
+            HttpResponse<JsonNode> jsonResponse = sendIssuesAPI(page, since);
 
             Headers headers = jsonResponse.getHeaders();
             xRateLimit = Integer.valueOf(headers.getFirst("X-RateLimit-Limit"));
@@ -51,16 +53,16 @@ public class GithubAPIHTTPClient {
                     long sleepTime = xRateReset = Instant.now().getEpochSecond();
                     logger.info(String.format("Sleeping for %s secondes", sleepTime));
                     Thread.sleep(1000*sleepTime);
-                    return getIssues(page);
+                    return getIssues(page, since);
                 default:
-                    logger.error(constructUrl(page));
+                    logger.error(constructUrl(page, since));
                     logger.error(String.valueOf(jsonResponse.getStatus()));
                     logger.error(jsonResponse.getBody().toString());
                     logger.error(jsonResponse.getHeaders().toString());
                     logger.error("Unknown error: Sleeping 5 seconds " +
                             "before re-trying");
                     Thread.sleep(5000L);
-                    return getIssues(page);
+                    return getIssues(page, since);
             }
         } catch (UnirestException e) {
             e.printStackTrace();
@@ -69,37 +71,41 @@ public class GithubAPIHTTPClient {
         }
     }
 
-    protected HttpResponse<JsonNode> sendIssuesAPI(Integer page) throws UnirestException {
-        GetRequest request = Unirest.get(constructUrl(page));
+    protected HttpResponse<JsonNode> sendIssuesAPI(Integer page, Instant since) throws UnirestException {
+        GetRequest request = Unirest.get(constructUrl(page, since));
         if (!config.getAuthUsername().isEmpty() && !config.getAuthUsername().isEmpty()) {
             request.basicAuth(config.getAuthUsername(), config.getAuthPassword());
         }
         return request.asJson();
     }
 
-    protected String constructUrl(Integer page) {
+    protected String constructUrl(Integer page, Instant since) {
         return String.format(
                 "http://api.github.com/repos/%s/%s/issues?page=%s&per_page=%s&since=%s&state=all&direction=asc&sort=updated",
                 config.getOwnerConfig(),
                 config.getRepoConfig(),
                 page,
                 config.getBatchSize(),
-                config.getSince().toString()
+                since.toString()
         );
     }
 
-    protected void sleepIfNeeds() throws InterruptedException {
+    public void sleep() throws InterruptedException {
+        // Split total sleep time evenly by xRateRemaining until reaching xRateReset time.
+        long sleepTime = (long) Math.ceil(
+                (double) ((xRateReset - Instant.now().getEpochSecond()) / xRateRemaining)
+        );
+        logger.debug(String.format("Sleeping for %s seconds", sleepTime ));
+        // There is small possibility sleepTime can be less than zero.
+        if (sleepTime > 0) {
+            Thread.sleep(1000*sleepTime);
+        }
+    }
+
+    public void sleepIfNeeds() throws InterruptedException {
         if (xRateRemaining > 0 && xRateRemaining <= 10) {
             logger.info(String.format("We are approaching the limit. only %s left", xRateRemaining));
-            // Split total sleep time evenly by xRateRemaining until reaching xRateReset time.
-            long sleepTime = (long) Math.ceil(
-                    (double) ((xRateReset - Instant.now().getEpochSecond()) / xRateRemaining)
-            );
-
-            // There is small possibility sleepTime can be less than zero.
-            if (sleepTime > 0) {
-                Thread.sleep(1000*sleepTime);
-            }
+            sleep();
         }
     }
 }

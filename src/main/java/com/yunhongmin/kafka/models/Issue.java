@@ -3,9 +3,11 @@ package com.yunhongmin.kafka.models;
 import com.yunhongmin.kafka.schemas.IssueSchema;
 import org.json.JSONObject;
 
+import java.time.Instant;
+
 public class Issue {
-    private String createdAt;
-    private String updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
     private Integer number;
     private String url;
     private String title;
@@ -13,19 +15,19 @@ public class Issue {
     private User user;
     private PullRequest pullRequest;
 
-    public String getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(String createAt) {
+    public void setCreatedAt(Instant createAt) {
         this.createdAt = createAt;
     }
 
-    public String getUpdatedAt() {
+    public Instant getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(String updatedAt) {
+    public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
     }
 
@@ -79,8 +81,8 @@ public class Issue {
 
     public static Issue fromJSON(JSONObject json) {
         Issue issue = new Issue();
-        issue.setCreatedAt(json.getString(IssueSchema.CREATED_AT_FIELD));
-        issue.setUpdatedAt(json.getString(IssueSchema.UPDATED_AT_FIELD));
+        issue.setCreatedAt(Instant.parse(json.getString(IssueSchema.CREATED_AT_FIELD)));
+        issue.setUpdatedAt(Instant.parse(json.getString(IssueSchema.UPDATED_AT_FIELD)));
         issue.setNumber(json.getInt(IssueSchema.NUMBER_FIELD));
         issue.setUrl(json.getString(IssueSchema.URL_FIELD));
         issue.setState(json.getString(IssueSchema.STATE_FIELD));
