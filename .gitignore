@@ -13,6 +13,7 @@
 
 # Generated files
 .idea/**/contentModel.xml
+out/**
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
@@ -74,11 +75,10 @@ fabric.properties
 
 
 # build class
-**/target/classes/**
-**/target/test-classes/**
-
-# properties
-twitter.properties
+**/target/**
 
 # mac
 .DS_Store
+
+# kafka offsets
+*.offsets

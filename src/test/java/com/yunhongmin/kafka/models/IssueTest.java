@@ -59,8 +59,8 @@ public class IssueTest {
     @Test
     public void issueObjectFromJson() {
         Issue issue = Issue.fromJSON(issueJson);
-        assertEquals("2017-04-04T06:47:09Z", issue.getCreatedAt());
-        assertEquals("2017-04-19T22:36:21Z", issue.getUpdatedAt());
+        assertEquals("2017-04-04T06:47:09Z", issue.getCreatedAt().toString());
+        assertEquals("2017-04-19T22:36:21Z", issue.getUpdatedAt().toString());
         assertEquals((long) 2800, issue.getNumber().longValue());
         assertEquals("https://api.github.com/repos/apache/kafka/issues/2800", issue.getUrl());
         assertEquals("closed", issue.getState());

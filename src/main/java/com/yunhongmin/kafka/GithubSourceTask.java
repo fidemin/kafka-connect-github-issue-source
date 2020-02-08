@@ -24,14 +24,15 @@ import java.util.Map;
 public class GithubSourceTask extends SourceTask {
     private static final Logger logger = LoggerFactory.getLogger(GithubSourceTask.class);
     private String NEXT_PAGE_FIELD = "next_page";
+    private String SINCE_FIELD = "since";
 
-    private GithubSourceConnectorConfig config;
-    private GithubAPIHttpClient githubAPIHttpClient;
+    protected GithubSourceConnectorConfig config;
+    protected GithubAPIHttpClient githubAPIHttpClient;
 
-    private Instant lastUpdatedAt;
-    private Integer nextPageToVisit = 1;
-    private Instant nextQuerySince;
-    private Integer lastIssueNumber;
+    protected Instant lastUpdatedAt;
+    protected Integer nextPageToVisit = 1;
+    protected Instant nextQuerySince;
+    protected Integer lastIssueNumber = -1;
 
     @Override
     public void start(Map<String, String> map) {
@@ -46,7 +47,6 @@ public class GithubSourceTask extends SourceTask {
 
         if (lastSourceOffset == null) {
             nextQuerySince = config.getSince();
-            lastIssueNumber = -1;
         } else {
             Object updatedAt = lastSourceOffset.get(IssueSchema.UPDATED_AT_FIELD);
             Object issueNumber = lastSourceOffset.get(IssueSchema.NUMBER_FIELD);
@@ -80,9 +80,8 @@ public class GithubSourceTask extends SourceTask {
             i += 1;
             lastUpdatedAt = issue.getUpdatedAt();
         }
-        if (i > 0) {
-            logger.info(String.format("Fetched %s records", i));
-        }
+
+        logger.info(String.format("Fetched %s records", i));
 
         if (i==config.getBatchSize()) {
             nextPageToVisit += 1;
@@ -109,12 +108,13 @@ public class GithubSourceTask extends SourceTask {
         Map<String, String> map = new HashMap<>();
         map.put(KeySchema.OWNER_FIELD, config.getOwnerConfig());
         map.put(KeySchema.REPOSITORY_FIELD, config.getRepoConfig());
+        map.put(SINCE_FIELD, config.getSince().toString());
         return map;
     }
 
     protected Map<String, String> sourceOffset(Instant updatedAt) {
         Map<String, String> map = new HashMap<>();
-        Instant maxDatetime = updatedAt.compareTo(lastUpdatedAt) > 0 ? updatedAt: lastUpdatedAt;
+        Instant maxDatetime = updatedAt.compareTo(nextQuerySince) > 0 ? updatedAt: nextQuerySince;
         map.put(IssueSchema.UPDATED_AT_FIELD, maxDatetime.toString());
         map.put(NEXT_PAGE_FIELD, nextPageToVisit.toString());
         map.put(IssueSchema.NUMBER_FIELD, lastIssueNumber.toString());

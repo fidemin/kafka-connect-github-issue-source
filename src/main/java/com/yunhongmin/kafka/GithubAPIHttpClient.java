@@ -31,7 +31,7 @@ public class GithubAPIHttpClient {
 
     protected JSONArray getIssues(Integer page, Instant since) throws InterruptedException {
         try {
-            HttpResponse<JsonNode> jsonResponse = sendIssuesAPI(page, since);
+            HttpResponse<JsonNode> jsonResponse = callIssuesAPI(page, since);
 
             Headers headers = jsonResponse.getHeaders();
             xRateLimit = Integer.valueOf(headers.getFirst("X-RateLimit-Limit"));
@@ -71,7 +71,7 @@ public class GithubAPIHttpClient {
         }
     }
 
-    protected HttpResponse<JsonNode> sendIssuesAPI(Integer page, Instant since) throws UnirestException {
+    protected HttpResponse<JsonNode> callIssuesAPI(Integer page, Instant since) throws UnirestException {
         GetRequest request = Unirest.get(constructUrl(page, since));
         if (!config.getAuthUsername().isEmpty() && !config.getAuthUsername().isEmpty()) {
             request.basicAuth(config.getAuthUsername(), config.getAuthPassword());
@@ -80,7 +80,7 @@ public class GithubAPIHttpClient {
     }
 
     protected String constructUrl(Integer page, Instant since) {
-        return String.format(
+        String url =  String.format(
                 "http://api.github.com/repos/%s/%s/issues?page=%s&per_page=%s&since=%s&state=all&direction=asc&sort=updated",
                 config.getOwnerConfig(),
                 config.getRepoConfig(),
@@ -88,6 +88,8 @@ public class GithubAPIHttpClient {
                 config.getBatchSize(),
                 since.toString()
         );
+        logger.info(url);
+        return url;
     }
 
     public void sleep() throws InterruptedException {
